@@ -5,7 +5,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
     <style>
-        #map { height: 400px; }
+        body, html { height: 85%;
+        margin: 1;
+    }
+        #map { 
+        height: 180vh; 
+        width: 55vw;
+        float: left;
+    }
     </style>
 </head>
 <body>
@@ -13,7 +20,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
-        var map = L.map('map').setView([51.505, -0.09], 13);
+        var map = L.map('map').setView([0, 0], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19
         }).addTo(map);
@@ -54,8 +61,7 @@
                                 [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
                                 [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
                                 [bounds.getSouthEast().lng, bounds.getSouthEast().lat],
-                                [bounds.getSouthWest().lng, bounds.getSouthWest().lat] 
-                            ]]
+                                                            ]]
                         }
                     };
 
