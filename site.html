@@ -5,18 +5,41 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
     <style>
-        body, html { height: 85%;
-        margin: 1;
-    }
-        #map { 
-        height: 180vh; 
-        width: 55vw;
-        float: left;
-    }
+        body, html { height: 85%; margin: 1; }
+        #map {
+            height: 180vh;
+            width: 55vw;
+            float: left;
+        }
+        .input-container {
+            position: absolute;
+            right: 25%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .input-container input, .input-container label, .input-container button {
+            display: block;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
     <div id="map"></div>
+    <div class="input-container">
+        <label for="Start-Date">Start Date</label>
+        <input type="text" id="Start-Date" placeholder="YYYY-MM-DD">
+
+        <label for="End-Date">End Date</label>
+        <input type="text" id="End-Date" placeholder="YYYY-MM-DD">
+        
+        <label for="layer-name">Layer Name</label>
+        <input type="text" id="layer-name" placeholder="Enter layer name">
+        
+        <button id="build-geojson">Build GeoJSON Object</button>
+    </div>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
@@ -25,11 +48,9 @@
             maxZoom: 19
         }).addTo(map);
 
-        
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
-        
         var drawControl = new L.Control.Draw({
             edit: {
                 featureGroup: drawnItems
@@ -46,30 +67,41 @@
         map.addControl(drawControl);
 
         map.on(L.Draw.Event.CREATED, function (e) {
+            drawnItems.clearLayers(); 
             var type = e.layerType,
                 layer = e.layer;
 
-            if (type === 'rectangle') {
-                var bounds = layer.getBounds(),
-                    geoJSON = {
-                        "type": "Feature",
-                        "properties": {},
-                        "geometry": {
-                            "type": "Polygon",
-                            "coordinates": [[
-                                [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
-                                [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
-                                [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                                [bounds.getSouthEast().lng, bounds.getSouthEast().lat],
-                                                            ]]
-                        }
-                    };
-
-                console.log(geoJSON); 
-            }
-
-            
             drawnItems.addLayer(layer);
+        });
+
+        document.getElementById('build-geojson').addEventListener('click', function() {
+            var start_date = document.getElementById('Start-Date').value;
+            var end_date = document.getElementById('End-Date').value;
+            var layerName = document.getElementById('layer-name').value;
+
+            drawnItems.eachLayer(function(layer) {
+                var bounds = layer.getBounds(),
+                geoJSON = {
+                    "type": "Feature",
+                    "properties": {
+                        "StartDate": start_date,
+                        "EndDate": end_date,
+                        "layerName": layerName
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
+                            [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
+                            [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
+                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat],
+                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat]
+                        ]]
+                    }
+                };
+
+                console.log(geoJSON); // Here you can also handle the geoJSON object as needed
+            });
         });
     </script>
 </body>
