@@ -15,4 +15,4 @@ async def receive_geojson(geojson: GeoJSON):
     print(geojson.dict())
     return {"message": "GeoJSON received successfully!"}
 
-# run in bash in same dir as this app uvicorn app:app --reload
+# run in bash in same dir as this app uvicorn pyendpoint:app --reload
