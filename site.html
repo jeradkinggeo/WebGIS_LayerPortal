@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>WebGIS Test</title>
+    <title>GIBS via Leaflet</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
     <style>
@@ -37,7 +37,8 @@
         
         <label for="layer-name">Layer Name</label>
         <input type="text" id="layer-name" placeholder="Enter layer name">
-        
+        <! -- Adding a drop down for layer name -->
+
         <button id="build-geojson">Build GeoJSON Object</button>
     </div>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
@@ -78,7 +79,7 @@
             var start_date = document.getElementById('Start-Date').value;
             var end_date = document.getElementById('End-Date').value;
             var layerName = document.getElementById('layer-name').value;
-
+            // Changing layername event listener to drop down
             drawnItems.eachLayer(function(layer) {
                 var bounds = layer.getBounds(),
                 geoJSON = {
@@ -94,11 +95,13 @@
                             [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
                             [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
                             [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat],
-                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat]
+                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
+                    
                         ]]
                     }
                 };
+                
+                console.log(geoJSON);
 
                 fetch('http://localhost:8000/geojson', {
                     method: 'POST',
@@ -108,7 +111,7 @@
                     body: JSON.stringify(geoJSON)
                 }).then(response => response.json())
 
-                console.log(geoJSON); // Here you can also handle the geoJSON object as needed
+                
             });
         });
     </script>
