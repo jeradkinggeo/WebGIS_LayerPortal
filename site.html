@@ -1,32 +1,82 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>GIBS via Leaflet</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
-        body, html { height: 85%; margin: 1; }
-        #map {
-            height: 180vh;
-            width: 55vw;
-            float: left;
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            background-color: rgba(133, 129, 129, 0.849);
         }
+
+        #map {
+            height: 98vh;
+            width: 55vw;
+            position: relative;
+            top: 5px;
+            left: 5px;
+            border: 5px ridge #000;
+        }
+
         .input-container {
             position: absolute;
-            right: 25%;
+            right: 16%;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
             flex-direction: column;
             gap: 10px;
+            border: 5px groove #333;
+            padding: 30px;
+            background-color: rgb(253, 239, 221);
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
         }
-        .input-container input, .input-container label, .input-container button {
+
+        .input-container input,
+        .input-container label,
+        .input-container button {
             display: block;
             margin-top: 10px;
+            font-weight: bold;
+            font-size: 1.3em;
+            padding: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            background-color: #444;
+            color: #fff;
+            border-radius: 5px;
+            padding: 10px 20px;
+        }
+
+        button:hover {
+            background-color: #666;
+        }
+
+        .title-container {
+            position: absolute;
+            right: 160px;
+            top: 10px;
+            z-index: 1000;
+            color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border: 5px inset #333;
+            font-size: 1.6em;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
+
 <body>
+    <div class="title-container"> NASA Image Generation and Acquisition Web Portal</div>
     <div id="map"></div>
     <div class="input-container">
         <label for="Start-Date">Start Date</label>
@@ -34,10 +84,17 @@
 
         <label for="End-Date">End Date</label>
         <input type="text" id="End-Date" placeholder="YYYY-MM-DD">
-        
+
         <label for="layer-name">Layer Name</label>
-        <input type="text" id="layer-name" placeholder="Enter layer name">
-        <! -- Adding a drop down for layer name -->
+        <form id="layer-name">
+            <select width=300 style="width: 350px" size="8" multiple>
+                <option value='Layer1'>Layer 1</option>
+                <option value='Layer2'>Layer 2</option>
+                <option value='Layer3'>Layer 3</option>
+                <option value='Layer4'>Layer 4</option>
+                <option value='Layer5'>Layer 5</option>
+            </select>
+        </form>
 
         <button id="build-geojson">Build GeoJSON Object</button>
     </div>
@@ -62,45 +119,45 @@
                 circle: false,
                 circlemarker: false,
                 marker: false,
-                rectangle: true 
+                rectangle: true
             }
         });
         map.addControl(drawControl);
 
         map.on(L.Draw.Event.CREATED, function (e) {
-            drawnItems.clearLayers(); 
+            drawnItems.clearLayers();
             var type = e.layerType,
                 layer = e.layer;
 
             drawnItems.addLayer(layer);
         });
 
-        document.getElementById('build-geojson').addEventListener('click', function() {
+        document.getElementById('build-geojson').addEventListener('click', function () {
             var start_date = document.getElementById('Start-Date').value;
             var end_date = document.getElementById('End-Date').value;
             var layerName = document.getElementById('layer-name').value;
             // Changing layername event listener to drop down
-            drawnItems.eachLayer(function(layer) {
+            drawnItems.eachLayer(function (layer) {
                 var bounds = layer.getBounds(),
-                geoJSON = {
-                    "type": "Feature",
-                    "properties": {
-                        "StartDate": start_date,
-                        "EndDate": end_date,
-                        "layerName": layerName
-                    },
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[
-                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
-                            [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
-                            [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
-                    
-                        ]]
-                    }
-                };
-                
+                    geoJSON = {
+                        "type": "Feature",
+                        "properties": {
+                            "StartDate": start_date,
+                            "EndDate": end_date,
+                            "layerName": layerName
+                        },
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[
+                                [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
+                                [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
+                                [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
+                                [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
+
+                            ]]
+                        }
+                    };
+
                 console.log(geoJSON);
 
                 fetch('http://localhost:8000/geojson', {
@@ -111,9 +168,10 @@
                     body: JSON.stringify(geoJSON)
                 }).then(response => response.json())
 
-                
+
             });
         });
     </script>
 </body>
+
 </html>
