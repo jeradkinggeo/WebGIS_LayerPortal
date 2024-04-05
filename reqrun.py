@@ -1,13 +1,15 @@
 import py_src
-from py_src import bbox_calculator as bbox
 from py_src import DataNormTool as dn
 from py_src import layersclass as lc
-import time 
+import zipfile
+import os
+import owslib
+from owslib.wms import WebMapService
 
 
 overwrite = True
 
-def request_func(geojson):
+def json_parse(geojson):
     properties = geojson.properties
 
     start_date = properties.get("StartDate")
@@ -33,13 +35,53 @@ def request_func(geojson):
             coordtransform = lc.coord_transformer(bounds)
             layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax = coordtransform
 
-    print(bounds)
+    if layer_obj.crs == 'EPSG:4326':
+        lc.resolution_calc(layer_obj, scale_factor)
+    elif layer_obj.crs == 'EPSG:3857':
+        lc.resolution_calc(layer_obj, (scale_factor/scale_factor) * .1)
+
+    
+
 
     
 
     print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
 
     return "GeoJSON received successfully!"
+
+
+def get_n_zip(bbox, date, layer_name, layer_obj):
+    if layer_obj.crs == 'EPSG:4326':
+        wms = WebMapService('https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?', version='1.1.1')
+    elif layer_obj.crs == 'EPSG:3857':
+        wms = WebMapService('https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?', version='1.1.1')
+    else:
+        raise ValueError("Invalid CRS")
+    
+    # Convert bbox string to a tuple of floats
+    bbox_tuple = tuple(map(float, bbox.split(',')))
+
+    img = wms.getmap(layers=['MODIS_Terra_CorrectedReflectance_TrueColor'],
+                     srs='epsg:4326',
+                     bbox=bbox_tuple,
+                     size=(1200, 600),
+                     time=date,
+                     format='image/png',
+                     transparent=True)
+    
+    # Save the image
+    image_path = f'tmp/{date}_MODIS_Terra_CorrectedReflectance_TrueColor.png'
+    with open(image_path, 'wb') as out:
+        out.write(img.read())
+    
+    # Create a ZIP file
+    zip_path = f'tmp/{date}_imagery.zip'
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        zipf.write(image_path, arcname=os.path.basename(image_path))
+    
+    # Cleanup the individual file after zipping
+    os.remove(image_path)
+
 
 # def main():
 
