@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from typing import Dict, Any
 import py_src.layersclass as lc
 import pyreqrun as pr
-
+import DataNormTool as dn
 
 app = FastAPI()
 
@@ -32,13 +32,20 @@ class Message(BaseModel):
 @app.post("/geojson/")
 async def receive_geojson(geojson: GeoJSON):
     # Accessing properties
+    #print(geojson.dict())
     properties = geojson.properties
 
-    pr.request_func(geojson)
+    start_date = properties.get("StartDate")
+    end_date = properties.get("EndDate")
+    scale_factor = properties.get("ScaleFactor")
+    layer_name = properties.get("LayerName")
+    bounds = properties.get("coordinates")
 
-    # Print individual variables
+    datelist = dn.create_date_list(start_date, end_date)
+    print(datelist)
+    message = pr.request_func(geojson)
+    print(message)
     #print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
 
-    return {"message": "GeoJSON received successfully!"}
 
 # uvicorn pyendpoint:app --reload

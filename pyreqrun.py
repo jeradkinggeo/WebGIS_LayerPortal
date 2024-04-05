@@ -18,6 +18,7 @@ def request_func(geojson):
 
 
     datelist = dn.create_date_list(start_date, end_date)
+    print(datelist)
 
     if layer_name is "MODIS_Terra_CorrectedReflectance_TrueColor":
         layer_obj = lc.MODIS_Terra_CorrectedReflectance_TrueColor
@@ -34,7 +35,7 @@ def request_func(geojson):
 
     print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
 
-    return {"message": "GeoJSON received successfully!"}
+    return "GeoJSON received successfully!"
 
 # def main():
 
