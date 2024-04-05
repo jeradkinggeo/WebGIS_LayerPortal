@@ -6,6 +6,9 @@ import lxml.etree as xmltree
 import os
 from pyproj import transform, Proj
 import datetime
+from datetime import datetime, timedelta
+
+
 
 class layer:
     def __init__(self, crs, wms, layer_name, abr, 
@@ -39,6 +42,13 @@ class layer:
                     format=self.format,  # Image format
                     transparent=self.transparent)
         return result
+    
+def create_date_list(start_date, end_date):
+    start = datetime.strptime(start_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+    num_days = (end - start).days
+    date_list = [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(num_days + 1)]
+    return date_list
     
 def coord_transformer(bounds):
     proj_4326 = Proj(init = 'epsg:4326')

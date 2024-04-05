@@ -137,48 +137,45 @@
         });
 
         document.getElementById('build-geojson').addEventListener('click', function () {
-            var start_date = document.getElementById('Start-Date').value;
-            var end_date = document.getElementById('End-Date').value;
-            var scale_factor = document.getElementById('scale-factor').value;
-            var layerSelect = document.getElementById('layer-name');
-            var layerName = layerSelect.options[layerSelect.selectedIndex].value;
-            // Changing layername event listener to drop down
-            drawnItems.eachLayer(function (layer) {
-                var bounds = layer.getBounds(),
-                    geoJSON = {
-                        "type": "Feature",
-                        "properties": {
-                            "StartDate": start_date,
-                            "EndDate": end_date,
-                            "ScaleFactor": scale_factor,
-                            "LayerName": layerName
-                        },
-                        "geometry": {
-                            "type": "Polygon",
-                            "coordinates": [[
-                                [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
-                                [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
-                                [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                                [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
-
-                            ]]
-                        }
-                    };
-
-                console.log(geoJSON);
-
-                fetch('http://localhost:8000/geojson', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+        var start_date = document.getElementById('Start-Date').value;
+        var end_date = document.getElementById('End-Date').value;
+        var scale_factor = document.getElementById('scale-factor').value;
+        var layerSelect = document.getElementById('layer-name');
+        var layerName = layerSelect.options[layerSelect.selectedIndex].value;
+        
+        drawnItems.eachLayer(function (layer) {
+            var bounds = layer.getBounds(),
+                geoJSON = {
+                    "type": "Feature",
+                    "properties": {
+                        "StartDate": start_date,
+                        "EndDate": end_date,
+                        "ScaleFactor": scale_factor,
+                        "LayerName": layerName
                     },
-                    body: JSON.stringify(geoJSON)
-                }).then(response => response.json())
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
+                            [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
+                            [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
+                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
+                        ]]
+                    }
+                };
 
+            console.log(geoJSON);
 
-            });
-        });
-    </script>
+            fetch('http://localhost:8000/geojson', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(geoJSON)
+            })
+        }); 
+    });
+</script>
 </body>
 
 </html>

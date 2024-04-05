@@ -2,9 +2,12 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any
-import py_src.layersclass as lc
-import pyreqrun as pr
-import DataNormTool as dn
+import shutil
+import layersclass as lc
+import reqrun as pr
+from fastapi.responses import FileResponse
+import os
+
 
 app = FastAPI()
 
@@ -39,13 +42,20 @@ async def receive_geojson(geojson: GeoJSON):
     end_date = properties.get("EndDate")
     scale_factor = properties.get("ScaleFactor")
     layer_name = properties.get("LayerName")
-    bounds = properties.get("coordinates")
+    coordinates = geojson.geometry.coordinates[0]
 
-    datelist = dn.create_date_list(start_date, end_date)
+
+    datelist = lc.create_date_list(start_date, end_date)
     print(datelist)
-    message = pr.request_func(geojson)
+    message = pr.json_parse(geojson)
     print(message)
     #print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
 
-
+@app.get("/download-imagery/{file_name}")
+async def download_imagery(file_name: str):
+    file_path = f"tmp/{file_name}"
+    if os.path.exists(file_path):
+        return FileResponse(path=file_path, filename=file_name, media_type='application/zip')
+    return {"error": "File not found."}
 # uvicorn pyendpoint:app --reload
+
