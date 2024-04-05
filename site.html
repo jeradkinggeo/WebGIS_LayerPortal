@@ -85,10 +85,14 @@
         <label for="End-Date">End Date</label>
         <input type="text" id="End-Date" placeholder="YYYY-MM-DD">
 
+        <label for="scale-factor">Scale Factor</label>
+        <input type="text" id="scale-factor" placeholder="1000">
+
+
         <label for="layer-name">Layer Name</label>
-        <form id="layer-name">
-            <select width=300 style="width: 350px" size="8" multiple>
-                <option value='Layer1'>Layer 1</option>
+        <form id="layer-name-form">
+            <select id="layer-name" width="300" style="width: 350px" size="8" multiple>
+                <option value='MODIS_Terra_CorrectedReflectance_TrueColor'>MODIS_Terra_CorrectedReflectance_TrueColor</option>
                 <option value='Layer2'>Layer 2</option>
                 <option value='Layer3'>Layer 3</option>
                 <option value='Layer4'>Layer 4</option>
@@ -135,7 +139,9 @@
         document.getElementById('build-geojson').addEventListener('click', function () {
             var start_date = document.getElementById('Start-Date').value;
             var end_date = document.getElementById('End-Date').value;
-            var layerName = document.getElementById('layer-name').value;
+            var scale_factor = document.getElementById('scale-factor').value;
+            var layerSelect = document.getElementById('layer-name');
+            var layerName = layerSelect.options[layerSelect.selectedIndex].value;
             // Changing layername event listener to drop down
             drawnItems.eachLayer(function (layer) {
                 var bounds = layer.getBounds(),
@@ -144,7 +150,8 @@
                         "properties": {
                             "StartDate": start_date,
                             "EndDate": end_date,
-                            "layerName": layerName
+                            "ScaleFactor": scale_factor,
+                            "LayerName": layerName
                         },
                         "geometry": {
                             "type": "Polygon",

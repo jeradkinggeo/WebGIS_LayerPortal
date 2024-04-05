@@ -1,7 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict
+from typing import Dict, Any
+import py_src.layersclass as lc
+import pyreqrun as pr
+
 
 app = FastAPI()
 
@@ -17,10 +20,25 @@ class GeoJSON(BaseModel):
     properties: Dict
     geometry: Dict
 
+class Message(BaseModel):
+    content: str
+
+#StartDate
+
+#EndDate
+
+#layerName
+
 @app.post("/geojson/")
 async def receive_geojson(geojson: GeoJSON):
-    # Process your GeoJSON here
-    print(geojson.dict())
+    # Accessing properties
+    properties = geojson.properties
+
+    pr.request_func(geojson)
+
+    # Print individual variables
+    #print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
+
     return {"message": "GeoJSON received successfully!"}
 
-# run in bash in same dir as this app uvicorn pyendpoint:app --reload
+# uvicorn pyendpoint:app --reload
