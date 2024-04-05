@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import List, Optional
 import shutil
 import layersclass as lc
 import reqrun as pr
@@ -18,10 +18,20 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"])
 
+class Properties(BaseModel):
+    StartDate: str
+    EndDate: str
+    ScaleFactor: str
+    LayerName: str
+
+class Geometry(BaseModel):
+    type: str
+    coordinates: List[List[List[float]]]  # Nested list for polygon coordinates
+
 class GeoJSON(BaseModel):
     type: str
-    properties: Dict
-    geometry: Dict
+    properties: Properties
+    geometry: Geometry
 
 class Message(BaseModel):
     content: str
@@ -36,13 +46,13 @@ class Message(BaseModel):
 async def receive_geojson(geojson: GeoJSON):
     # Accessing properties
     #print(geojson.dict())
-    properties = geojson.properties
+    start_date = geojson.properties.StartDate
+    end_date = geojson.properties.EndDate
+    scale_factor = geojson.properties.ScaleFactor
+    layer_name = geojson.properties.LayerName
+    geometry = geojson.geometry
 
-    start_date = properties.get("StartDate")
-    end_date = properties.get("EndDate")
-    scale_factor = properties.get("ScaleFactor")
-    layer_name = properties.get("LayerName")
-    coordinates = geojson.geometry.coordinates[0]
+    coordinates = geometry.coordinates
 
 
     datelist = lc.create_date_list(start_date, end_date)

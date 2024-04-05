@@ -7,14 +7,29 @@ import layersclass as lc
 
 overwrite = True
 
-def json_parse(geojson):
-    properties = geojson.properties
+def get_bounds(coordinates):
 
-    start_date = properties.get("StartDate")
-    end_date = properties.get("EndDate")
-    scale_factor = properties.get("ScaleFactor")
-    layer_name = properties.get("LayerName")
-    bounds = geojson.geometry.coordinates
+    xmin = xmax = coordinates[0][0]
+    ymin = ymax = coordinates[0][1]
+
+    for coord in coordinates:
+        xmin = min(xmin, coord[0])
+        ymin = min(ymin, coord[1])
+        xmax = max(xmax, coord[0])
+        ymax = max(ymax, coord[1])
+
+    bounds = (xmin, ymin, xmax, ymax)
+    return bounds
+
+def json_parse(geojson):
+    start_date = geojson.properties.StartDate
+    end_date = geojson.properties.EndDate
+    scale_factor = geojson.properties.ScaleFactor
+    layer_name = geojson.properties.LayerName
+    geometry = geojson.geometry
+
+    coordinates = geometry.coordinates
+    bounds = get_bounds(coordinates)
 
 
     datelist = lc.create_date_list(start_date, end_date)
@@ -30,6 +45,7 @@ def json_parse(geojson):
         layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax = bounds
         
     elif layer_obj.crs == 'EPSG:3857':
+            #TypeError: unsupported operand type(s) for -: 'list' and 'list'
             coordtransform = lc.coord_transformer(bounds)
             layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax = coordtransform
 
