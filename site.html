@@ -93,7 +93,7 @@
         <form id="layer-name-form">
             <select id="layer-name" width="300" style="width: 350px" size="8" multiple>
                 <option value='MODIS_Terra_CorrectedReflectance_TrueColor'>MODIS_Terra_CorrectedReflectance_TrueColor</option>
-                <option value='Layer2'>Layer 2</option>
+                <option value='MODIS_Aqua_Terra_AOD'>MODIS_Aqua_Terra_AOD</option>
                 <option value='Layer3'>Layer 3</option>
                 <option value='Layer4'>Layer 4</option>
                 <option value='Layer5'>Layer 5</option>
@@ -172,7 +172,15 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(geoJSON)
-            })
+            }).then(response => response.json())
+                .then(data => {
+                 const fileName = data.fileName
+                 const downloadLink = document.createElement('a')
+                 downloadLink.href = `http://localhost:8000/download/${fileName}`
+                 downloadlink.innerText = "Download Imagery";
+                 document.body.appendChild(downloadLink);
+                });
+
         }); 
     });
 </script>

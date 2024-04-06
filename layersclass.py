@@ -7,6 +7,7 @@ import os
 from pyproj import transform, Proj
 import datetime
 from datetime import datetime, timedelta
+import geopandas as gpd
 
 
 
@@ -50,6 +51,13 @@ def create_date_list(start_date, end_date):
     date_list = [(start + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(num_days + 1)]
     return date_list
     
+
+def shp_extent(shapefile_path):
+    gdf = gpd.read_file(shapefile_path)
+    bounds = gdf.total_bounds
+    return (bounds[0], bounds[1], bounds[2], bounds[3])
+
+
 def coord_transformer(bounds):
     proj_4326 = Proj(init = 'epsg:4326')
     proj_3857 = Proj(init = 'epsg:3857')
@@ -170,8 +178,8 @@ def set_bbox(self, bounds):
 
 def resolution_calc(self, scale):
     scalefactor = scale  
-    width = ((self.xmax - self.xmin) * scalefactor)
-    height = ((self.ymax - self.ymin) * scalefactor)
+    width = ((int(self.xmax) - int(self.xmin)) * scalefactor)
+    height = ((int(self.ymax) - int(self.ymin)) * scalefactor)
     self.size = (width, height)
 
 

@@ -7,14 +7,18 @@ import layersclass as lc
 import reqrun as pr
 from fastapi.responses import FileResponse
 import os
+import logging
 
+logger = logging.getLogger("my_logger")
+logging.basicConfig(level=logging.INFO)
 
+#File name line 177 error
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], 
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],  
     allow_headers=["*"])
 
@@ -44,22 +48,13 @@ class Message(BaseModel):
 
 @app.post("/geojson/")
 async def receive_geojson(geojson: GeoJSON):
-    # Accessing properties
-    #print(geojson.dict())
-    start_date = geojson.properties.StartDate
-    end_date = geojson.properties.EndDate
-    scale_factor = geojson.properties.ScaleFactor
-    layer_name = geojson.properties.LayerName
-    geometry = geojson.geometry
+    print(geojson.dict())
+    print(geojson.properties.LayerName)
 
-    coordinates = geometry.coordinates
-
-
-    datelist = lc.create_date_list(start_date, end_date)
-    print(datelist)
-    message = pr.json_parse(geojson)
-    print(message)
+    pr.json_parse(geojson)
+    
     #print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
+
 
 @app.get("/download-imagery/{file_name}")
 async def download_imagery(file_name: str):
