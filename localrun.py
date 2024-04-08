@@ -55,7 +55,7 @@ def json_parse(geojson):
     else:
         raise ValueError("Invalid Layer Name")
 
-
+    print(scale_factor)
     if layer_obj.crs == 'EPSG:4326':
         layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax = bounds
         print(bounds)
@@ -68,7 +68,8 @@ def json_parse(geojson):
     if layer_obj.crs == 'EPSG:4326':
         lc.resolution_calc(layer_obj, scale_factor)
     elif layer_obj.crs == 'EPSG:3857':
-        lc.resolution_calc(layer_obj, (scale_factor/scale_factor) * .1)
+        adjusted_scale_factor = (int(scale_factor) / int(scale_factor)) * 0.1
+        lc.resolution_calc(layer_obj, adjusted_scale_factor)
     
 
 
@@ -97,7 +98,9 @@ def main():
     for geojson_file in geojson_files:
         file_path = os.path.join(cwd, geojson_file)
         geojson = read_and_parse_geojson(file_path)
-        json_parse(geojson)
+        bounds, datelist, layer_name, layer_obj = json_parse(geojson)
+        print(layer_obj.size)
+        lc.layer_pull(bounds, datelist, layer_name, layer_obj)
 
 
 

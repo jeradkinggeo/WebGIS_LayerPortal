@@ -35,6 +35,7 @@ class layer:
         if self.Time_format == True:
             timeP = timeP + "T00:00:00Z"
         wms = WebMapService(self.wms)
+        print(wms)
         result = wms.getmap(layers=self.name,  # Layers
                     srs=self.crs,  # Map projection
                     bbox=(self.xmin,self.ymin, self.xmax,self.ymax),  # Bounds
@@ -65,53 +66,46 @@ def coord_transformer(bounds):
     xmax, ymax = transform(proj_4326, proj_3857, bounds[2], bounds[3])
     return (xmin, ymin, xmax, ymax)
 
-def layer_pull(satname, date, region):
-    sat = satname
-    if isinstance(date, list) and isinstance(satname, list):
-        dates = date
-        pri_dir = "Image_Directory"
-        if os.path.exists(pri_dir):        
-            os.chdir(pri_dir)
-            current_time = datetime.datetime.now().strftime("%m-%d_%H-%M")
-            os.mkdir("runtime" + '_' + current_time)
-            os.chdir("runtime" + '_' + current_time)
-            for d in range(0, len(dates)):
-                pathname = region + '_' + dates[d]
-                os.makedirs(pathname)
-                os.chdir(pathname)
-                for s in range(0, len(satname)):
-                    img = satname[s].wms_req(dates[d])
-                    with open(satname[s].abr + "_" + dates[d] + '.png', 'wb') as out:
-                        out.write(img.read())
-                os.chdir('..')
-        else:
-            os.mkdir(pri_dir)
-            os.chdir(pri_dir)
-            for d in range(0, len(dates)):
-                pathname = region + '_' + dates[d]
-                os.makedirs(pathname)
-                os.chdir(pathname)
-                for s in range(0, len(satname)):
-                    img = satname[s].wms_req(dates[d])
-                    with open(satname[s].abr + "_" + dates[d] + '.png', 'wb') as out:
-                        out.write(img.read())
-                os.chdir('..')
-    elif isinstance(date, list):
-        dates = date
-        pri_dir = "Image_Directory"
-        os.chdir(pri_dir)
-        for d in range(0, len(dates)):
-            pathname = region + '_' + dates[d]
-            os.makedirs(pathname)
-            os.chdir(pathname)
-            img = satname.wms_req(dates[d])
-            with open(satname.abr[0] + dates[d] + '.png', 'wb') as out:
-                out.write(img.read())
-        os.chdir('..')           
-    else:
-        pathname = region + '_' + str(date)
-        os.makedirs(pathname)
+
+def layer_pull(bounds, datelist, layer_name, layer_obj):
+    pri_dir = "Image_Directory"
+    region = f"{bounds[0]}_{bounds[1]}_{bounds[2]}_{bounds[3]}"  
+
+    if not isinstance(datelist, list):
+        datelist = [datelist]
+
+    if not os.path.exists(pri_dir):
+        os.mkdir(pri_dir)
+    
+    os.chdir(pri_dir)
+    
+    
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    runtime_dir = "runtime_" + current_time
+    os.mkdir(runtime_dir)
+    os.chdir(runtime_dir)
+    
+    for d in datelist:
+        pathname = region + '_' + d
+        os.makedirs(pathname, exist_ok=True)  
         os.chdir(pathname)
+        
+        if isinstance(layer_obj, list):
+            
+            for sat in layer_obj:
+                img = sat.wms_req("date")
+                with open(sat.abr + "_" + d + '.png', 'wb') as out:
+                    out.write(img.read())
+        else:
+            
+            img = layer_obj.wms_req(d)
+            with open(layer_obj.abr + "_" + d + '.png', 'wb') as out:
+                out.write(img.read())
+                
+        os.chdir('..')  
+
+    os.chdir(os.path.join('..', '..'))
+
 
 
 MODIS_Terra_CorrectedReflectance_TrueColor = layer(
