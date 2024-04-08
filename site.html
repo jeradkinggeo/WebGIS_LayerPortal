@@ -101,10 +101,13 @@
         </form>
 
         <button id="build-geojson">Build GeoJSON Object</button>
-    </div>
+        <a id="download-geojson" style="display: none;">Download GeoJSON</a>
+    </div>        
+    
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
+    document.addEventListener('DOMContentLoaded', function () {
         var map = L.map('map').setView([0, 0], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19
@@ -130,60 +133,70 @@
 
         map.on(L.Draw.Event.CREATED, function (e) {
             drawnItems.clearLayers();
-            var type = e.layerType,
-                layer = e.layer;
-
-            drawnItems.addLayer(layer);
+            drawnItems.addLayer(e.layer);
         });
 
         document.getElementById('build-geojson').addEventListener('click', function () {
-        var start_date = document.getElementById('Start-Date').value;
-        var end_date = document.getElementById('End-Date').value;
-        var scale_factor = document.getElementById('scale-factor').value;
-        var layerSelect = document.getElementById('layer-name');
-        var layerName = layerSelect.options[layerSelect.selectedIndex].value;
-        
-        drawnItems.eachLayer(function (layer) {
-            var bounds = layer.getBounds(),
-                geoJSON = {
-                    "type": "Feature",
-                    "properties": {
-                        "StartDate": start_date,
-                        "EndDate": end_date,
-                        "ScaleFactor": scale_factor,
-                        "LayerName": layerName
+            var start_date = document.getElementById('Start-Date').value;
+            var end_date = document.getElementById('End-Date').value;
+            var scale_factor = document.getElementById('scale-factor').value;
+            var layerSelect = document.getElementById('layer-name');
+            var layerName = layerSelect.options[layerSelect.selectedIndex].value;
+
+            drawnItems.eachLayer(function (layer) {
+                var bounds = layer.getBounds(),
+                    geoJSON = {
+                        "type": "Feature",
+                        "properties": {
+                            "StartDate": start_date,
+                            "EndDate": end_date,
+                            "ScaleFactor": scale_factor,
+                            "LayerName": layerName
+                        },
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": [[
+                                [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
+                                [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
+                                [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
+                                [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
+                            ]]
+                        }
+                    };
+                    console.log(geoJSON);
+                fetch('http://localhost:8000/geojson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
                     },
-                    "geometry": {
-                        "type": "Polygon",
-                        "coordinates": [[
-                            [bounds.getSouthWest().lng, bounds.getSouthWest().lat],
-                            [bounds.getNorthWest().lng, bounds.getNorthWest().lat],
-                            [bounds.getNorthEast().lng, bounds.getNorthEast().lat],
-                            [bounds.getSouthEast().lng, bounds.getSouthEast().lat]
-                        ]]
+                    body: JSON.stringify(geoJSON)
+                })
+                .then(response => {
+                    if(!response.ok) {
+                        throw new Error('Network response was not ok');
                     }
-                };
-
-            console.log(geoJSON);
-
-            fetch('http://localhost:8000/geojson', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(geoJSON)
-            }).then(response => response.json())
+                    return response.json();
+                })
                 .then(data => {
-                 const fileName = data.fileName
-                 const downloadLink = document.createElement('a')
-                 downloadLink.href = `http://localhost:8000/download/${fileName}`
-                 downloadlink.innerText = "Download Imagery";
-                 document.body.appendChild(downloadLink);
-                });
-
-        }); 
+                    console.log(data);
+                    if (!data){
+                        console.error('No data returned');
+                        return;
+                    }
+                    const jsonString = JSON.stringify(data);
+                    console.log(jsonString);
+                    const blob = new Blob([jsonString], {type: "application/json"});
+                    const url = window.URL.createObjectURL(blob);
+                    const downloadBtn = document.getElementById('download-geojson');
+                    downloadBtn.href = url;
+                    downloadBtn.download = `${layerName}_${new Date().toISOString().split('T')[0]}.geojson`;
+                    downloadBtn.style.display = 'inline';
+                })
+                .catch(error => console.error('Fetch error:', error));
+            });
+        });
     });
-</script>
+    </script>
 </body>
 
 </html>

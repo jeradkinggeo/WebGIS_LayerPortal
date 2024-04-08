@@ -5,9 +5,11 @@ from typing import List, Optional
 import shutil
 import layersclass as lc
 import reqrun as pr
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
 import logging
+import json
+
 
 logger = logging.getLogger("my_logger")
 logging.basicConfig(level=logging.INFO)
@@ -48,14 +50,27 @@ class Message(BaseModel):
 
 @app.post("/geojson/")
 async def receive_geojson(geojson: GeoJSON):
-    print(geojson.dict())
-    print(geojson.properties.LayerName)
+        process_geojson = (geojson.dict())
 
-    pr.json_parse(geojson)
-    
+        print(geojson.dict())
+        print(geojson.properties.LayerName)
+        return JSONResponse(content=geojson.dict())
+
+        #pr.json_parse(geojson)
+
+    #     zip_path = pr.get_n_zip(bbox, datelist, layer_name, layer_obj)
+
+        
+    #     return FileResponse(path=zip_path, filename=os.path.basename(zip_path), media_type='application/zip')
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=str(e))
+
+
+
     #print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
 
 
+#This should get the 
 @app.get("/download-imagery/{file_name}")
 async def download_imagery(file_name: str):
     file_path = f"tmp/{file_name}"

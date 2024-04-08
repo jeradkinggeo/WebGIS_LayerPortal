@@ -57,7 +57,7 @@ def get_n_zip(bbox, date, layer_name, layer_obj):
         img = layer_obj.wms_req(date[d])
     
         # Save the image
-        image_path = f'tmp/{date}_MODIS_Terra_CorrectedReflectance_TrueColor.png'
+        image_path = f'tmp/{date}_{layer_name}.png'
         with open(image_path, 'wb') as out:
             out.write(img.read())
         
@@ -113,8 +113,12 @@ def json_parse(geojson):
 
 
     
-
+   #bounds = (layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax)
+    
     print(f"Start Date: {start_date}, End Date: {end_date}, Scale Factor: {scale_factor}, Layer Name: {layer_name}")
+    return bounds, datelist, layer_name, layer_obj
 
-    get_n_zip(bounds, datelist, layer_name, layer_obj)
+    #get_n_zip([layer_obj.xmin, layer_obj.ymin, layer_obj.xmax, layer_obj.ymax], datelist, layer_name, layer_obj)
+
+    
 
