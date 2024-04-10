@@ -172,9 +172,21 @@ def set_bbox(self, bounds):
 
 def resolution_calc(self, scale):
     scalefactor = scale  
-    width = ((int(self.xmax) - int(self.xmin)) * scalefactor)
-    height = ((int(self.ymax) - int(self.ymin)) * scalefactor)
-    self.size = (width, height)
+    
+    initial_width = (int(self.xmax) - int(self.xmin)) * scalefactor
+    initial_height = (int(self.ymax) - int(self.ymin)) * scalefactor
+    
+    max_dimension = max(initial_width, initial_height)
+    
+    if max_dimension > 20000:
+        reduction_factor = 20000 / max_dimension
+        width = initial_width * reduction_factor
+        height = initial_height * reduction_factor
+    else:
+        width = initial_width
+        height = initial_height
+    
+    self.size = (int(width), int(height))
 
 
 #Index for layers are hardcoded, but works for now
