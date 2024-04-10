@@ -86,7 +86,7 @@ def layer_pull(bounds, datelist, layer_name, layer_obj):
     os.chdir(runtime_dir)
     
     for d in datelist:
-        pathname = region + '_' + d
+        pathname = d
         os.makedirs(pathname, exist_ok=True)  
         os.chdir(pathname)
         

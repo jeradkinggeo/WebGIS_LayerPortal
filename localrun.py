@@ -68,7 +68,7 @@ def json_parse(geojson):
     if layer_obj.crs == 'EPSG:4326':
         lc.resolution_calc(layer_obj, scale_factor)
     elif layer_obj.crs == 'EPSG:3857':
-        adjusted_scale_factor = (int(scale_factor) / int(scale_factor)) * 0.1
+        adjusted_scale_factor = (int(scale_factor) / int(scale_factor))
         lc.resolution_calc(layer_obj, adjusted_scale_factor)
     
 
