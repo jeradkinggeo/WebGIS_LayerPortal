@@ -30,19 +30,6 @@ def get_bounds(coordinates):
 
     return (xmin, ymin, xmax, ymax)
 
-# def get_bounds2(coordinates):
-
-#     xmin = xmax = coordinates[0][0]
-#     ymin = ymax = coordinates[0][1]
-
-#     for coord in coordinates:
-#         xmin = min(xmin, coord[0])
-#         ymin = min(ymin, coord[1])
-#         xmax = max(xmax, coord[0])
-#         ymax = max(ymax, coord[1])
-
-#     bounds = (xmin, ymin, xmax, ymax)
-#     return bounds
 
 def get_n_zip(bbox, date, layer_name, layer_obj):
     layercrs = layer_obj.crs
